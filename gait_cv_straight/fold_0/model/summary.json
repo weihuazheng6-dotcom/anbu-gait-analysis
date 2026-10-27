@@ -1,0 +1,39 @@
+{
+  "n_samples": 92,
+  "train": 54,
+  "val": 18,
+  "test": {
+    "n": 20,
+    "positive": 10,
+    "accuracy": 0.8,
+    "sensitivity": 1.0,
+    "specificity": 0.6,
+    "precision": 0.7142857142857143,
+    "f1": 0.8333333333333334,
+    "auc": 0.96,
+    "threshold": 0.46,
+    "tn": 6,
+    "fp": 4,
+    "fn": 0,
+    "tp": 10
+  },
+  "best_val_auc": 0.9506172839506173,
+  "by_action": [
+    {
+      "action": "直线",
+      "n": 20,
+      "positive": 10,
+      "accuracy": 0.8,
+      "sensitivity": 1.0,
+      "specificity": 0.6,
+      "precision": 0.7142857142857143,
+      "f1": 0.8333333333333334,
+      "auc": 0.96,
+      "threshold": 0.46,
+      "tn": 6,
+      "fp": 4,
+      "fn": 0,
+      "tp": 10
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "method": "Stratified subject-level 5-fold cross-validation",
+  "seed": 42,
+  "aggregate": {
+    "accuracy": {
+      "mean": 0.8711111111111112,
+      "std": 0.05588789484426348
+    },
+    "sensitivity": {
+      "mean": 0.9555555555555555,
+      "std": 0.060858061945018485
+    },
+    "specificity": {
+      "mean": 0.7866666666666666,
+      "std": 0.1419441726459672
+    },
+    "precision": {
+      "mean": 0.8301298701298702,
+      "std": 0.10424616351464616
+    },
+    "f1": {
+      "mean": 0.8833230134158928,
+      "std": 0.0450031591139233
+    },
+    "auc": {
+      "mean": 0.9722469135802468,
+      "std": 0.031005896946885353
+    }
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "n": 20,
+      "positive": 10,
+      "accuracy": 0.8,
+      "sensitivity": 1.0,
+      "specificity": 0.6,
+      "precision": 0.7142857142857143,
+      "f1": 0.8333333333333334,
+      "auc": 0.96,
+      "threshold": 0.46,
+      "tn": 6,
+      "fp": 4,
+      "fn": 0,
+      "tp": 10
+    },
+    {
+      "fold": 2,
+      "n": 18,
+      "positive": 9,
+      "accuracy": 0.8333333333333334,
+      "sensitivity": 0.8888888888888888,
+      "specificity": 0.7777777777777778,
+      "precision": 0.8,
+      "f1": 0.8421052631578947,
+      "auc": 0.9753086419753086,
+      "threshold": 0.88,
+      "tn": 7,
+      "fp": 2,
+      "fn": 1,
+      "tp": 8
+    },
+    {
+      "fold": 3,
+      "n": 18,
+      "positive": 9,
+      "accuracy": 0.8888888888888888,
+      "sensitivity": 1.0,
+      "specificity": 0.7777777777777778,
+      "precision": 0.8181818181818182,
+      "f1": 0.9,
+      "auc": 0.9259259259259258,
+      "threshold": 0.94,
+      "tn": 7,
+      "fp": 2,
+      "fn": 0,
+      "tp": 9
+    },
+    {
+      "fold": 4,
+      "n": 18,
+      "positive": 9,
+      "accuracy": 0.9444444444444444,
+      "sensitivity": 0.8888888888888888,
+      "specificity": 1.0,
+      "precision": 1.0,
+      "f1": 0.9411764705882353,
+      "auc": 1.0,
+      "threshold": 0.52,
+      "tn": 9,
+      "fp": 0,
+      "fn": 1,
+      "tp": 8
+    },
+    {
+      "fold": 5,
+      "n": 18,
+      "positive": 9,
+      "accuracy": 0.8888888888888888,
+      "sensitivity": 1.0,
+      "specificity": 0.7777777777777778,
+      "precision": 0.8181818181818182,
+      "f1": 0.9,
+      "auc": 1.0,
+      "threshold": 0.69,
+      "tn": 7,
+      "fp": 2,
+      "fn": 0,
+      "tp": 9
+    }
+  ]
+}
