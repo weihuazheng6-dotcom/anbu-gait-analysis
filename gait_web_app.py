@@ -290,7 +290,7 @@ def _style():
       html, body, [class*="css"] { font-family: 'Nunito','Microsoft YaHei',sans-serif; }
       .stApp { background: #f7faf8; color:var(--ink); }
       [data-testid="stAppViewContainer"] > .main { background: radial-gradient(circle at 92% 4%, #e2f1eb 0, #f7faf8 28rem); }
-      .block-container { max-width:1120px; padding-top:1.3rem; padding-bottom:3rem; }
+      .block-container { max-width:1120px; padding-top:4rem; padding-bottom:3rem; }
       h1,h2,h3,p,label { color:var(--ink); }
       h1 { letter-spacing:-.03em; }
       [data-testid="stMarkdownContainer"] p { font-size:1.08rem; line-height:1.72; }
@@ -317,7 +317,7 @@ def _header(step=None):
         st.markdown("### 🌿 安步 · 步态分析平台")
     if step:
         with right:
-            st.markdown(f"<div style='text-align:right;padding-top:1rem;color:#607876'>第 {step} 步 / 2</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align:right;padding-top:1rem;color:#607876'>第 {step} 步 / 3</div>", unsafe_allow_html=True)
 
 
 def _welcome():
@@ -330,43 +330,61 @@ def _welcome():
     </div>
     """, unsafe_allow_html=True)
     st.write("")
-    st.subheader("开始前，准备好这些内容")
+    st.subheader("使用流程")
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown("<div class='soft-card'><span class='step-number'>1</span><b>填写基本信息</b><p>用于报告说明和步长估算。</p></div>", unsafe_allow_html=True)
+        st.markdown("<div class='soft-card'><span class='step-number'>1</span><b>填写基本信息</b><p>姓名、性别、身高、体重和出生日期。</p></div>", unsafe_allow_html=True)
     with c2:
-        st.markdown("<div class='soft-card'><span class='step-number'>2</span><b>准备两份 CSV</b><p>同一位受试者在两个不同时间点的普通直线步行数据。</p></div>", unsafe_allow_html=True)
+        st.markdown("<div class='soft-card'><span class='step-number'>2</span><b>上传两份 CSV</b><p>同一位受试者在两个不同时间点的普通直线步行数据。</p></div>", unsafe_allow_html=True)
     with c3:
-        st.markdown("<div class='soft-card'><span class='step-number'>3</span><b>查看并保存报告</b><p>完成分析后，可下载 PDF 留存。</p></div>", unsafe_allow_html=True)
+        st.markdown("<div class='soft-card'><span class='step-number'>3</span><b>查看分析报告</b><p>查看步态变化，并下载 PDF 留存。</p></div>", unsafe_allow_html=True)
     st.write("")
-    left, right = st.columns([1.3, 1])
-    with left:
-        st.subheader("您的基本信息")
-        with st.form("profile_form"):
-            name = st.text_input("姓名", placeholder="请输入姓名")
-            col_a, col_b = st.columns(2)
-            with col_a:
-                gender = st.selectbox("性别", ["女", "男", "其他 / 不便透露"])
-                height = st.number_input("身高（厘米）", min_value=100, max_value=220, value=160, step=1)
-            with col_b:
-                weight = st.number_input("体重（公斤）", min_value=25.0, max_value=250.0, value=60.0, step=0.5)
-                birthday = st.date_input("出生年月日", value=date(1960, 1, 1), min_value=date(1900, 1, 1), max_value=date.today(), format="YYYY-MM-DD")
-            consent = st.checkbox("我了解本页面仅作步态数据观察，不用于疾病诊断。")
-            submitted = st.form_submit_button("保存信息，进入测量页面 →", type="primary", use_container_width=True)
-        if submitted:
-            if not name.strip():
-                st.error("请先填写姓名。")
-            elif not consent:
-                st.error("请确认您已了解报告用途。")
-            else:
-                st.session_state.profile = {
-                    "name": name.strip(), "gender": gender, "height": float(height),
-                    "weight": float(weight), "birthday": birthday,
-                }
-                st.session_state.page = "measure"
-                st.rerun()
-    with right:
-        st.markdown("<div class='soft-card'><h3>隐私与使用说明</h3><p><b>隐私提醒：</b>本机启动时，资料由本机处理；在线使用时，您填写的个人信息和上传的步态 CSV 会通过网络发送至托管服务器分析。应用代码不会把测量资料写入长期数据库或文件，但托管平台可能按其规则处理运行数据。请仅在取得本人同意后使用，并避免上传不必要的身份信息。</p><p>本平台不会给出疾病诊断。若您近期跌倒、疼痛或步态明显改变，请联系医生或康复专业人员。</p><p><b>需要帮助？</b><br>1297221477@qq.com</p></div>", unsafe_allow_html=True)
+    st.markdown("<div class='soft-card'><h3>隐私与使用说明</h3><p><b>隐私提醒：</b>本机启动时，资料由本机处理；在线使用时，您填写的个人信息和上传的步态 CSV 会通过网络发送至托管服务器分析。应用代码不会把测量资料写入长期数据库或文件，但托管平台可能按其规则处理运行数据。请仅在取得本人同意后使用，并避免上传不必要的身份信息。</p><p>本平台不会给出疾病诊断。若您近期跌倒、疼痛或步态明显改变，请联系医生或康复专业人员。</p><p><b>需要帮助？</b> 1297221477@qq.com</p></div>", unsafe_allow_html=True)
+    st.write("")
+    if st.button("开始使用 →", type="primary", use_container_width=True):
+        st.session_state.page = "profile"
+        st.rerun()
+
+
+def _profile():
+    _header(1)
+    st.title("填写基本信息")
+    st.write("这些信息用于生成报告和估算步长。")
+    saved_profile = st.session_state.get("profile", {})
+    gender_options = ["女", "男", "其他 / 不便透露"]
+    saved_gender = saved_profile.get("gender", gender_options[0])
+    gender_index = gender_options.index(saved_gender) if saved_gender in gender_options else 0
+    with st.form("profile_form"):
+        name = st.text_input("姓名", value=saved_profile.get("name", ""), placeholder="请输入姓名")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            gender = st.selectbox("性别", gender_options, index=gender_index)
+            height = st.number_input("身高（厘米）", min_value=100, max_value=220, value=int(saved_profile.get("height", 160)), step=1)
+        with col_b:
+            weight = st.number_input("体重（公斤）", min_value=25.0, max_value=250.0, value=float(saved_profile.get("weight", 60.0)), step=0.5)
+            birthday = st.date_input("出生年月日", value=saved_profile.get("birthday", date(1960, 1, 1)), min_value=date(1900, 1, 1), max_value=date.today(), format="YYYY-MM-DD")
+        consent = st.checkbox("我了解本页面仅作步态数据观察，不用于疾病诊断。")
+        back, forward = st.columns(2)
+        with back:
+            back_clicked = st.form_submit_button("← 返回欢迎页", use_container_width=True)
+        with forward:
+            submitted = st.form_submit_button("保存信息，继续上传 CSV →", type="primary", use_container_width=True)
+    if back_clicked:
+        st.session_state.page = "welcome"
+        st.rerun()
+    if submitted:
+        if not name.strip():
+            st.error("请先填写姓名。")
+        elif not consent:
+            st.error("请确认您已了解报告用途。")
+        else:
+            st.session_state.profile = {
+                "name": name.strip(), "gender": gender, "height": float(height),
+                "weight": float(weight), "birthday": birthday,
+            }
+            st.session_state.pop("analysis", None)
+            st.session_state.page = "measure"
+            st.rerun()
 
 
 def _measure():
@@ -391,7 +409,7 @@ def _measure():
     col1, col2 = st.columns([1, 2])
     with col1:
         if st.button("← 返回修改基本信息", use_container_width=True):
-            st.session_state.page = "welcome"
+            st.session_state.page = "profile"
             st.rerun()
     with col2:
         run_analysis = st.button("分析步态并生成 PDF 报告", type="primary", use_container_width=True, disabled=not (base_upload and dual_upload))
@@ -412,56 +430,69 @@ def _measure():
                 "base_windows": len(extract_windows_from_frame(base_frame)),
                 "dual_windows": len(extract_windows_from_frame(dual_frame)),
             }
+            st.session_state.page = "report"
+            st.rerun()
         except Exception as exc:
             st.error(f"分析没有完成：{exc}")
             st.info("请检查 CSV 格式、动作类型与文件配对。原始测量文件不会被更改。")
 
+
+
+def _report():
     analysis = st.session_state.get("analysis")
-    if analysis and (
-        not base_upload or not dual_upload
-        or analysis["base_name"] != base_upload.name
-        or analysis["dual_name"] != dual_upload.name
-    ):
-        st.session_state.pop("analysis", None)
-        analysis = None
-    if analysis:
-        result = analysis["result"]
-        headline, followup = _result_text(result)
-        st.divider()
-        st.subheader("本次分析结果")
-        st.markdown(f"### {headline}")
-        st.write(f"五个模型中有 **{result['positive_votes']} 个**认为两次测量的变化超过模型判别阈值。模型平均提示分值为 **{result['score'] * 100:.1f}%**；它不是疾病概率或临床诊断结果。")
-        st.caption(followup)
-        met1, met2, met3 = st.columns(3)
-        met1.metric("较早测量时长", f"{analysis['base_duration']:.1f} 秒")
-        met2.metric("较晚测量时长", f"{analysis['dual_duration']:.1f} 秒")
-        met3.metric("步长校准系数", f"{analysis['factor']:.3f}")
-        st.subheader("步态参数对比")
-        table_rows = []
-        for key in PARAM_KEYS:
-            base = float(analysis["base_params"].get(key, np.nan))
-            dual = float(analysis["dual_params"].get(key, np.nan))
-            table_rows.append({
-                "参数": PARAM_NAMES.get(key, PARAM_LABELS.get(key, key)),
-                "较早测量": round(base, 3), "较晚测量": round(dual, 3),
-                "变化": round(dual - base, 3),
-                "变化比例": "—" if abs(base) < 1e-8 else f"{(dual - base) / abs(base) * 100:+.1f}%",
-            })
-        st.dataframe(pd.DataFrame(table_rows), hide_index=True, use_container_width=True)
-        safe_name = re.sub(r'[\\/:*?"<>|]+', "_", profile["name"])
-        st.download_button(
-            "下载步态分析报告（PDF）", data=analysis["pdf"],
-            file_name=f"{safe_name}_步态分析报告.pdf", mime="application/pdf",
-            type="primary", use_container_width=True,
-        )
-        st.caption(f"报告联系邮箱：{CONTACT_EMAIL}。关闭或刷新网页后，本次结果可能不会保留。")
-        with st.expander("模型验证背景"):
-            validation = result["validation"].get("aggregate", {})
-            auc = validation.get("auc", {}).get("mean")
-            sensitivity = validation.get("sensitivity", {}).get("mean")
-            specificity = validation.get("specificity", {}).get("mean")
-            st.write(f"受试者级五折验证：AUC {auc:.3f}，敏感度 {sensitivity:.1%}，特异度 {specificity:.1%}。")
-            st.caption("验证测试集每折约 18–20 份配对样本。该验证针对单任务与双任务配对；不同时间点的实际随访变化尚未独立验证。")
+    if not analysis:
+        st.session_state.page = "measure"
+        st.rerun()
+        return
+    _header(3)
+    st.title("步态分析报告")
+    st.caption(f"受试者：{st.session_state.profile['name']} · 本次报告已生成")
+    result = analysis["result"]
+    headline, followup = _result_text(result)
+    st.markdown(f"### {headline}")
+    st.write(f"五个模型中有 **{result['positive_votes']} 个**认为两次测量的变化超过模型判别阈值。模型平均提示分值为 **{result['score'] * 100:.1f}%**；它不是疾病概率或临床诊断结果。")
+    st.caption(followup)
+    met1, met2, met3 = st.columns(3)
+    met1.metric("较早测量时长", f"{analysis['base_duration']:.1f} 秒")
+    met2.metric("较晚测量时长", f"{analysis['dual_duration']:.1f} 秒")
+    met3.metric("步长校准系数", f"{analysis['factor']:.3f}")
+    st.subheader("步态参数对比")
+    table_rows = []
+    for key in PARAM_KEYS:
+        base = float(analysis["base_params"].get(key, np.nan))
+        dual = float(analysis["dual_params"].get(key, np.nan))
+        table_rows.append({
+            "参数": PARAM_NAMES.get(key, PARAM_LABELS.get(key, key)),
+            "较早测量": round(base, 3), "较晚测量": round(dual, 3),
+            "变化": round(dual - base, 3),
+            "变化比例": "—" if abs(base) < 1e-8 else f"{(dual - base) / abs(base) * 100:+.1f}%",
+        })
+    st.dataframe(pd.DataFrame(table_rows), hide_index=True, use_container_width=True)
+    safe_name = re.sub(r'[\\/:*?"<>|]+', "_", st.session_state.profile["name"])
+    st.download_button(
+        "下载步态分析报告（PDF）", data=analysis["pdf"],
+        file_name=f"{safe_name}_步态分析报告.pdf", mime="application/pdf",
+        type="primary", use_container_width=True,
+    )
+    st.caption(f"报告联系邮箱：{CONTACT_EMAIL}。关闭或刷新网页后，本次结果可能不会保留。")
+    with st.expander("模型验证背景"):
+        validation = result["validation"].get("aggregate", {})
+        auc = validation.get("auc", {}).get("mean")
+        sensitivity = validation.get("sensitivity", {}).get("mean")
+        specificity = validation.get("specificity", {}).get("mean")
+        st.write(f"受试者级五折验证：AUC {auc:.3f}，敏感度 {sensitivity:.1%}，特异度 {specificity:.1%}。")
+        st.caption("验证测试集每折约 18–20 份配对样本。该验证针对单任务与双任务配对；不同时间点的实际随访变化尚未独立验证。")
+    back, restart = st.columns(2)
+    with back:
+        if st.button("← 返回 CSV 上传页", use_container_width=True):
+            st.session_state.page = "measure"
+            st.rerun()
+    with restart:
+        if st.button("开始新的分析", use_container_width=True):
+            for key in ("profile", "analysis"):
+                st.session_state.pop(key, None)
+            st.session_state.page = "welcome"
+            st.rerun()
 
 
 def main():
@@ -469,10 +500,14 @@ def main():
     _style()
     if "page" not in st.session_state:
         st.session_state.page = "welcome"
-    if st.session_state.page == "welcome" or "profile" not in st.session_state:
+    if st.session_state.page == "welcome":
         _welcome()
-    else:
+    elif st.session_state.page == "profile":
+        _profile()
+    elif st.session_state.page == "measure" and "profile" in st.session_state:
         _measure()
+    else:
+        _report()
 
 
 if __name__ == "__main__":
