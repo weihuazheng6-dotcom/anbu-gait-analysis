@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import os
+import pickle
 import re
 import sys
 from datetime import date
@@ -84,6 +85,14 @@ def _extract(frame: pd.DataFrame, height_cm: float, calibration_factor: float):
     return params, windows
 
 
+class _CPUUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        # Pickled CUDA tensors must be remapped before CPU inference can load them.
+        if module == "torch.storage" and name == "_load_from_bytes":
+            return lambda data: torch.load(io.BytesIO(data), map_location="cpu", weights_only=True)
+        return super().find_class(module, name)
+
+
 @st.cache_resource(show_spinner="正在载入直线配对模型…")
 def _load_models():
     models = []
@@ -93,7 +102,7 @@ def _load_models():
         if not model_path.exists():
             raise FileNotFoundError(f"缺少第 {fold + 1} 折模型：{model_path}")
         with model_path.open("rb") as stream:
-            package = __import__("pickle").load(stream)
+            package = _CPUUnpickler(stream).load()
         model = PairNet(feature_size=len(PARAM_KEYS) * 4 + len(FAMILIES))
         model.load_state_dict(package["state"])
         model.eval()
