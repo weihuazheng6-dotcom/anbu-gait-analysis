@@ -164,9 +164,14 @@ def _result_text(result):
 
 def _font():
     for candidate in (r"C:\Windows\Fonts\simsun.ttc", r"C:\Windows\Fonts\msyh.ttc"):
+    for candidate in (
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        r"C:\Windows\Fonts\msyh.ttc", r"C:\Windows\Fonts\simsun.ttc",
+    ):
         if os.path.exists(candidate):
             return FontProperties(fname=candidate)
     return FontProperties(family="DejaVu Sans")
+    raise RuntimeError("缺少报告所需的中文字体，请确认已通过 packages.txt 安装 fonts-noto-cjk，并重启应用。")
 
 
 def _make_pdf(profile, result, base_params, dual_params, base_file, dual_file,
@@ -181,52 +186,92 @@ def _make_pdf(profile, result, base_params, dual_params, base_file, dual_file,
     validation = result["validation"].get("aggregate", {})
 
     with PdfPages(output) as pdf:
+    def text(ax, x, y, value, **kwargs):
+        # Measure Chinese and filenames explicitly; Matplotlib wrap misses CJK text.
+        properties = kwargs.get("fontproperties", body_font)
+        kwargs.pop("wrap", None)
+        renderer = ax.figure.canvas.get_renderer()
+        width = ax.get_window_extent().width * (1 - x)
+        lines = []
+        for paragraph in str(value).split("\n"):
+            line = ""
+            for char in paragraph:
+                if line and renderer.get_text_width_height_descent(line + char, properties, False)[0] > width:
+                    lines.append(line)
+                    line = ""
+                line += char
+            lines.append(line)
+        ax.text(x, y, "\n".join(lines), linespacing=1.5, parse_math=False, **kwargs)
+        return y - len(lines) * properties.get_size_in_points() * 1.5 / (ax.get_position().height * 11.69 * 72)
+
+    with matplotlib.rc_context({"pdf.fonttype": 42}), PdfPages(output) as pdf:
         fig = plt.figure(figsize=(8.27, 11.69), facecolor="white")
         ax = fig.add_axes([0.10, 0.08, 0.80, 0.84])
         ax.axis("off")
         ax.text(0.0, 0.98, "步态分析报告", fontproperties=title_font,
+        text(ax, 0.0, 0.98, "步态分析报告", fontproperties=title_font,
                 color="#1f6b66", va="top")
         ax.text(0.0, 0.92, f"受测者：{profile['name']}    性别：{profile['gender']}    年龄：{_age(profile['birthday'])} 岁",
+        text(ax, 0.0, 0.92, f"受测者：{profile['name']}    性别：{profile['gender']}    年龄：{_age(profile['birthday'])} 岁",
                 fontproperties=body_font, color="#334155", va="top")
         ax.text(0.0, 0.885,
+        text(ax, 0.0, 0.885,
                 f"出生日期：{profile['birthday'].isoformat()}    身高：{profile['height']:.0f} cm    体重：{profile['weight']:.1f} kg    BMI：{bmi:.1f}",
                 fontproperties=body_font, color="#334155", va="top")
         ax.text(0.0, 0.855, "身高用于估算腿长；性别与体重仅作报告信息，不作为当前模型输入。",
+        text(ax, 0.0, 0.855, "身高用于估算腿长；性别与体重仅作报告信息，不作为当前模型输入。",
                 fontproperties=body_font, color="#64748b", va="top")
         ax.text(0.0, 0.82, "两次普通直线步行的变化评估", fontproperties=body_font,
+        text(ax, 0.0, 0.82, "两次普通直线步行的变化评估", fontproperties=body_font,
                 color="#64748b", va="top")
         ax.text(0.0, 0.75, f"{score:.1f}%", fontproperties=FontProperties(fname=font.get_file(), size=34) if font.get_file() else FontProperties(size=34),
+        text(ax, 0.0, 0.75, f"{score:.1f}%", fontproperties=FontProperties(fname=font.get_file(), size=34) if font.get_file() else FontProperties(size=34),
                 color="#1f6b66", va="top")
         ax.text(0.0, 0.685, headline, fontproperties=FontProperties(fname=font.get_file(), size=15) if font.get_file() else FontProperties(size=15),
+        text(ax, 0.0, 0.685, headline, fontproperties=FontProperties(fname=font.get_file(), size=15) if font.get_file() else FontProperties(size=15),
                 color="#1f2937", va="top")
         ax.text(0.0, 0.635, followup, fontproperties=body_font, color="#475569",
+        text(ax, 0.0, 0.635, followup, fontproperties=body_font, color="#475569",
                 va="top", wrap=True)
         ax.text(0.0, 0.55, "测量文件", fontproperties=body_font, color="#1f6b66", va="top")
         ax.text(0.0, 0.515, f"较早时间点：{base_file}", fontproperties=body_font, color="#334155", va="top", wrap=True)
         ax.text(0.0, 0.48, f"较晚时间点：{dual_file}", fontproperties=body_font, color="#334155", va="top", wrap=True)
         ax.text(0.0, 0.445, f"13.3 米步长校准系数：{calibration_factor:.3f}", fontproperties=body_font, color="#334155", va="top")
         ax.text(0.0, 0.37, "模型分值用于衡量变化与训练参考模式的接近程度，不是患病概率；阈值是模型判别阈值。",
+        text(ax, 0.0, 0.55, "测量文件", fontproperties=body_font, color="#1f6b66", va="top")
+        file_font = FontProperties(fname=font.get_file(), size=9)
+        y = text(ax, 0.0, 0.515, f"较早时间点：{base_file}", fontproperties=file_font, color="#334155", va="top")
+        y = text(ax, 0.0, y - 0.008, f"较晚时间点：{dual_file}", fontproperties=file_font, color="#334155", va="top")
+        y = text(ax, 0.0, y - 0.012, f"13.3 米步长校准系数：{calibration_factor:.3f}", fontproperties=body_font, color="#334155", va="top")
+        y = text(ax, 0.0, y - 0.025, "模型分值用于衡量变化与训练参考模式的接近程度，不是患病概率；阈值是模型判别阈值。",
                 fontproperties=body_font, color="#475569", va="top", wrap=True)
         auc = validation.get("aggregate", {}).get("auc", {}).get("mean")
         if auc is not None:
             ax.text(0.0, 0.32, f"训练参考：受试者级五折平均 AUC {auc:.3f}。该指标评估普通步态与双任务诱发变化的区分能力，不等同于真实长期随访准确率。",
+            y = text(ax, 0.0, y - 0.015, f"训练参考：受试者级五折平均 AUC {auc:.3f}。该指标评估普通步态与双任务诱发变化的区分能力，不等同于真实长期随访准确率。",
                     fontproperties=body_font, color="#64748b", va="top", wrap=True)
         ax.text(0.0, 0.23,
+        text(ax, 0.0, y - 0.025,
                 "重要说明：双任务变化仅作为训练参照。当前模型尚未用真实长期随访验证，提示结果用于关注和复测，不作疾病诊断。请尽量保持鞋靴、传感器、路线和采集设置一致。",
                 fontproperties=body_font, color="#8a4b08", va="top", wrap=True)
         ax.text(0.0, 0.13, f"报告联系邮箱：{CONTACT_EMAIL}", fontproperties=body_font,
+        text(ax, 0.0, 0.08, f"报告联系邮箱：{CONTACT_EMAIL}", fontproperties=body_font,
                 color="#1f6b66", va="top")
         ax.text(0.0, 0.04, "步态分析平台 · 步态变化报告", fontproperties=body_font,
+        text(ax, 0.0, 0.04, "步态分析平台 · 步态变化报告", fontproperties=body_font,
                 color="#94a3b8", va="bottom")
         pdf.savefig(fig, bbox_inches="tight")
+        pdf.savefig(fig)
         plt.close(fig)
 
         fig = plt.figure(figsize=(8.27, 11.69), facecolor="white")
         ax = fig.add_axes([0.08, 0.08, 0.84, 0.84])
         ax.axis("off")
         ax.text(0.0, 0.98, "步态参数对比", fontproperties=title_font,
+        text(ax, 0.0, 0.98, "步态参数对比", fontproperties=title_font,
                 color="#1f6b66", va="top")
         ax.text(0.0, 0.92, "同一受试者两个时间点的参数摘要",
+        text(ax, 0.0, 0.92, "同一受试者两个时间点的参数摘要",
                 fontproperties=body_font, color="#475569", va="top")
         table_rows = []
         for key in PARAM_KEYS:
@@ -234,6 +279,7 @@ def _make_pdf(profile, result, base_params, dual_params, base_file, dual_file,
             dual_value = float(dual_params.get(key, float("nan")))
             change = dual_value - base_value
             pct = "—" if abs(base_value) < 1e-8 else f"{change / abs(base_value) * 100:+.1f}%"
+            pct = "-" if abs(base_value) < 1e-8 else f"{change / abs(base_value) * 100:+.1f}%"
             table_rows.append([
                 PARAM_NAMES.get(key, PARAM_LABELS.get(key, key)),
                 f"{base_value:.3f}", f"{dual_value:.3f}", f"{change:+.3f}", pct,
@@ -252,21 +298,28 @@ def _make_pdf(profile, result, base_params, dual_params, base_file, dual_file,
             cell.get_text().set_fontproperties(body_font)
             cell.get_text().set_color("#1f6b66" if row == 0 else "#334155")
         ax.text(0.0, 0.53, "数据概况", fontproperties=body_font,
+        text(ax, 0.0, 0.53, "数据概况", fontproperties=body_font,
                 color="#1f6b66", va="top")
         ax.text(0.0, 0.49,
+        text(ax, 0.0, 0.49,
                 f"较早测量：{len(base_rows)} 个采样点，约 {len(base_rows) / FS:.1f} 秒，{len(extract_windows_from_frame(base_rows))} 个完整窗口",
                 fontproperties=body_font, color="#334155", va="top")
         ax.text(0.0, 0.45,
+        text(ax, 0.0, 0.45,
                 f"较晚测量：{len(dual_rows)} 个采样点，约 {len(dual_rows) / FS:.1f} 秒，{len(extract_windows_from_frame(dual_rows))} 个完整窗口",
                 fontproperties=body_font, color="#334155", va="top")
         ax.text(0.0, 0.36,
+        text(ax, 0.0, 0.36,
                 "参数变化百分比以较早测量为参照。不同设备、鞋垫安装方式、行走环境与步态周期会影响参数，建议尽量保持测量条件一致。",
                 fontproperties=body_font, color="#64748b", va="top", wrap=True)
         ax.text(0.0, 0.25, f"如需了解报告内容，请联系：{CONTACT_EMAIL}",
+        text(ax, 0.0, 0.25, f"如需了解报告内容，请联系：{CONTACT_EMAIL}",
                 fontproperties=body_font, color="#1f6b66", va="top")
         ax.text(0.0, 0.04, "步态分析平台 · 步态变化报告", fontproperties=body_font,
+        text(ax, 0.0, 0.04, "步态分析平台 · 步态变化报告", fontproperties=body_font,
                 color="#94a3b8", va="bottom")
         pdf.savefig(fig, bbox_inches="tight")
+        pdf.savefig(fig)
         plt.close(fig)
     return output.getvalue()
 
